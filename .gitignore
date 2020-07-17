@@ -1,0 +1,10 @@
+venv
+.idea
+config.json
+misc
+cookies.txt
+__pycache__
+test.py
+*.db
+*.log
+creds.json
