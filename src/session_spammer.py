@@ -7,6 +7,6 @@ if __name__ == "__main__":
         pg = _in.get_transactions_page()
         if pg:
             print("session status : OK")
-            time.sleep(600)
         else:
             print("session ended !!")
+        time.sleep(600)

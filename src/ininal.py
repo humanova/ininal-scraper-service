@@ -35,7 +35,7 @@ class IninalScraper:
         url = f"https://onis.ininal.com/kart/hesap-hareketleri-filtre?token={self.card_token}"
         try:
             r = requests.get(url, cookies=self.cookies)
-            if not "Bulunamadı" in r.text:
+            if not "Hesap açın" in r.text:
                 return r.text
             else:
                 return None
@@ -51,29 +51,31 @@ class IninalScraper:
         transactions = []
         try:
             r = requests.get(url, cookies=self.cookies)
-            soup = BeautifulSoup(r.text, "html.parser")
-            page_count = int(soup.find_all('a')[-1].text)
-
-            for pg in range(1, (page_count + 1)):
-                pg_url = f"{url}&page={pg}"
-                r = requests.get(pg_url, cookies=self.cookies)
+            if not "Kayıt Bulunamadı" in r.text:
                 soup = BeautifulSoup(r.text, "html.parser")
-                page_transacitons = [list_item for list_item in soup.find_all('li')[1:(-1 - page_count)]]
+                page_count = int(soup.find_all('a')[-1].text)
 
-                for tr in page_transacitons:
-                    date = tr.find("div", {"class": "date"}).text.strip()
-                    seller = tr.find("div", {"class": "seller"}).text
-                    amount = tr.find("div", {"class": "amount"}).text.strip()
-                    _type = tr.find("div", {"class": "type"}).text
-                    reference = tr.find("div", {"class": "reference"}).text
-                    tr_dict = {"date": date,
-                               "seller": seller,
-                               "amount": amount,
-                               "type": _type,
-                               "reference": reference}
-                    transactions.append(tr_dict)
-            return transactions
+                for pg in range(1, (page_count + 1)):
+                    pg_url = f"{url}&page={pg}"
+                    r = requests.get(pg_url, cookies=self.cookies)
+                    soup = BeautifulSoup(r.text, "html.parser")
+                    page_transacitons = [list_item for list_item in soup.find_all('li')[1:(-1 - page_count)]]
 
+                    for tr in page_transacitons:
+                        date = tr.find("div", {"class": "date"}).text.strip()
+                        seller = tr.find("div", {"class": "seller"}).text
+                        amount = tr.find("div", {"class": "amount"}).text.strip()
+                        _type = tr.find("div", {"class": "type"}).text
+                        reference = tr.find("div", {"class": "reference"}).text
+                        tr_dict = {"date": date,
+                                   "seller": seller,
+                                   "amount": amount,
+                                   "type": _type,
+                                   "reference": reference}
+                        transactions.append(tr_dict)
+                return transactions
+            else:
+                return None
         except Exception as e:
             print(f"An exception occured : {e}")
             traceback.print_exc()
